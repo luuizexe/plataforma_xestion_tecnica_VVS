@@ -2,7 +2,7 @@
 
 ## Instalación
 
-Este proxecto es un fork de outro que consta de dúas partes:
+Este proxecto é un fork de outro que consta de dúas partes:
 
 - A parte servidor
 - A parte cliente
