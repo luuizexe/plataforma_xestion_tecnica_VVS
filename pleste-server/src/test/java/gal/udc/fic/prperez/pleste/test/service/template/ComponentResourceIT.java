@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = Application.class)
-public class ComponentResourceTest {
+public class ComponentResourceIT {
 	private final ComponentResource componentResource;
 	private final TemplateResource templateResource;
 
-	public @Autowired  ComponentResourceTest(ComponentResource componentResource, TemplateResource templateResource) {
+	public @Autowired  ComponentResourceIT(ComponentResource componentResource, TemplateResource templateResource) {
 		this.componentResource = componentResource;
 		this.templateResource = templateResource;
 	}
