@@ -108,10 +108,15 @@ public class UsersResource {
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns a randomly generated token", responseCode = "200",
 					content = @Content(schema = @Schema(implementation = JSONString.class))),
+			@ApiResponse(description = "The password is missing", responseCode = "400",
+					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class))),
 			@ApiResponse(description = "User not found, or password doesn't match", responseCode = "404",
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
-	public JSONString login(@QueryParam("user") String username, JSONString passwordArg) throws UserNotFoundException {
+	public JSONString login(@QueryParam("user") String username, JSONString passwordArg) throws UserNotFoundException, InvalidUserDataException {
+		if(passwordArg == null || passwordArg.toString() == null) {
+			throw new InvalidUserDataException("password");
+		}
 		String password = passwordArg.toString();
 		if(userDatabase.existsByUsername(username)) {
 			User user = userDatabase.getByUsername(username);
