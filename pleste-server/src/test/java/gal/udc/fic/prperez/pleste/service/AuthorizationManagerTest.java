@@ -90,6 +90,13 @@ public class AuthorizationManagerTest {
 	}
 
 	@ParameterizedTest
+	@ValueSource(strings = {"unknown", NORMAL_TOKEN, ADMIN_TOKEN})
+	@DisplayName("Login is allowed with any token, even an expired one")
+	void testLoginWithAnyToken(String token) {
+		assertDoesNotThrow(request(token, "POST", "users/login"));
+	}
+
+	@ParameterizedTest
 	@NullAndEmptySource
 	@DisplayName("The OpenAPI document is allowed without token")
 	void testOpenApiWithoutToken(String token) {

@@ -34,10 +34,13 @@ public class AuthorizationManager implements ContainerRequestFilter {
 		path = requestContext.getUriInfo().getPath();
 		method = requestContext.getMethod();
 
+		// O login e a documentación son públicos, aínda que o cliente envíe un token (válido ou caducado)
+		if(path.matches("users/login") || path.matches("openapi.json")) {
+			return;
+		}
+
 		if( token == null || token.isEmpty() ) {
-			if(!(path.matches("users/login") || path.matches("openapi.json"))) {
-				throw new UnauthenticatedUserException();
-			}
+			throw new UnauthenticatedUserException();
 		} else {
 			if (tokenDatabase.existsByToken(token)) {
 				user = tokenDatabase.getByToken(token).getUser();
