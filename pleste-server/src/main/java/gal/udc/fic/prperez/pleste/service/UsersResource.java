@@ -70,9 +70,11 @@ public class UsersResource {
 		} else {
 			skip = skip == null ? 0 : skip;
 
-			Pageable page = PageRequest.of(skip, count, Sort.by("id"));
+			// skip é o número de usuarios que se saltan, non o número de páxina
+			int size = (int) Math.min((long) skip + count, Integer.MAX_VALUE);
+			Pageable page = PageRequest.of(0, size, Sort.by("id"));
 
-			return userDatabase.findAll(page).stream().map(User::getId).toList();
+			return userDatabase.findAll(page).stream().skip(skip).map(User::getId).toList();
 		}
 	}
 
