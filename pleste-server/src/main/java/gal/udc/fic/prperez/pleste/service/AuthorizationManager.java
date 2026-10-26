@@ -49,7 +49,7 @@ public class AuthorizationManager implements ContainerRequestFilter {
 					}
 				}
 				if (path.matches("users/?.*")) {
-					if( user.getRole().equals(Roles.NORMAL_USER) && method.equals("POST") && !path.matches(".*/logout$")) {
+					if( user.getRole().equals(Roles.NORMAL_USER) && !method.equals("GET") && !(method.equals("POST") && path.matches(".*/logout$"))) {
 						throw new IllegalActionForUserException(user.getUsername());
 					}
 				}
