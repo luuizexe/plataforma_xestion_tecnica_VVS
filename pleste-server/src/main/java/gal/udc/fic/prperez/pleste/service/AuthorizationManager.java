@@ -41,15 +41,17 @@ public class AuthorizationManager implements ContainerRequestFilter {
 		} else {
 			if (tokenDatabase.existsByToken(token)) {
 				user = tokenDatabase.getByToken(token).getUser();
+				// Un usuario sen rol trátase coma un usuario normal
+				boolean isAdministrator = Roles.ADMINISTRATOR.equals(user.getRole());
 				if (path.matches("templates/?.*")) {
-					if(user.getRole().equals(Roles.ADMINISTRATOR) || (method.equals("GET") && user.getRole().equals(Roles.NORMAL_USER))) {
+					if(isAdministrator || method.equals("GET")) {
 						return;
 					} else {
 						throw new IllegalActionForUserException(user.getUsername());
 					}
 				}
 				if (path.matches("users/?.*")) {
-					if( user.getRole().equals(Roles.NORMAL_USER) && !method.equals("GET") && !(method.equals("POST") && path.matches(".*/logout$"))) {
+					if( !isAdministrator && !method.equals("GET") && !(method.equals("POST") && path.matches(".*/logout$"))) {
 						throw new IllegalActionForUserException(user.getUsername());
 					}
 				}
