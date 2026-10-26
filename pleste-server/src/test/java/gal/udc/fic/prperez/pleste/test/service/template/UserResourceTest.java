@@ -20,7 +20,8 @@ public class UserResourceTest {
 	private static User createTestUser() {
 		User user = new User();
 		user.setUsername("A");
-		
+		user.setPassword("A");
+
 		return user;
 	}
 

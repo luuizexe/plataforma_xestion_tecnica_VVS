@@ -3,6 +3,7 @@ package gal.udc.fic.prperez.pleste.service;
 import gal.udc.fic.prperez.pleste.service.dao.SQLDaoFactoryUtil;
 import gal.udc.fic.prperez.pleste.service.dao.users.*;
 import gal.udc.fic.prperez.pleste.service.exceptions.RESTExceptionSerializable;
+import gal.udc.fic.prperez.pleste.service.exceptions.authentication.InvalidUserDataException;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserAlreadyExistsException;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserNotFoundException;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -81,10 +82,18 @@ public class UsersResource {
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns created user ID", responseCode = "200",
 					content = @Content(schema = @Schema(implementation = Long.class))),
+			@ApiResponse(description = "The username or the password are missing", responseCode = "400",
+					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class))),
 			@ApiResponse(description = "A user with the same name already exists", responseCode = "409",
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
-	public Long addUser(User user) throws UserAlreadyExistsException {
+	public Long addUser(User user) throws UserAlreadyExistsException, InvalidUserDataException {
+		if(user.getUsername() == null || user.getUsername().isBlank()) {
+			throw new InvalidUserDataException("username");
+		}
+		if(user.getPassword() == null || user.getPassword().isEmpty()) {
+			throw new InvalidUserDataException("password");
+		}
 		if(userDatabase.existsByUsername(user.getUsername())) {
 			throw new UserAlreadyExistsException(user.getUsername());
 		}
