@@ -431,6 +431,17 @@ public class UsersResourceTest {
 	}
 
 	@Test
+	@DisplayName("deleteUser deletes the session tokens of the user")
+	void testDeleteUserDeletesTokens() {
+		User alice = user(3, "alice");
+		List<Token> tokens = List.of(new Token(1L, alice, "abc"), new Token(2L, alice, "def"));
+		givenStoredUser(alice);
+		when(tokenDatabase.findByUser(alice)).thenReturn(tokens);
+		resource.deleteUser("3");
+		verify(tokenDatabase).deleteAll(tokens);
+	}
+
+	@Test
 	@DisplayName("deleteUser with an unknown id throws UserNotFoundException")
 	void testDeleteUserUnknown() {
 		assertThrows(UserNotFoundException.class, () -> resource.deleteUser("3"));

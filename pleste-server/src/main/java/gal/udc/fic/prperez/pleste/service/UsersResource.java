@@ -222,6 +222,9 @@ public class UsersResource {
 		Long id = parseId(idParam);
 
 		if(userDatabase.existsById(id)) {
+			// Os tokens apuntan ao usuario, así que hai que borralos antes
+			SQLTokenDao tokenDatabase = databaseFactory.getSqlTokenDao();
+			tokenDatabase.deleteAll(tokenDatabase.findByUser(userDatabase.getReferenceById(id)));
 			userDatabase.deleteById(id);
 		} else {
 			throw new UserNotFoundException(idParam);
