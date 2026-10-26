@@ -376,6 +376,14 @@ public class UsersResourceTest {
 	}
 
 	@Test
+	@DisplayName("setUser returns the saved user")
+	void testSetUserReturnsSavedUser() {
+		givenStoredUser(user(3, "alice"));
+		User modified = new User(null, "bob", "bob@udc.es", passwordHash, Roles.NORMAL_USER);
+		assertSame(modified, resource.setUser("3", modified));
+	}
+
+	@Test
 	@DisplayName("setUser saves the new username")
 	void testSetUserUpdatesUsername() {
 		givenStoredUser(user(3, "alice"));
