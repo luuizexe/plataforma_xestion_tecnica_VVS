@@ -2,6 +2,7 @@ package gal.udc.fic.prperez.pleste.service;
 
 import gal.udc.fic.prperez.pleste.service.dao.SQLDaoFactoryUtil;
 import gal.udc.fic.prperez.pleste.service.dao.users.*;
+import gal.udc.fic.prperez.pleste.service.exceptions.InvalidPaginationException;
 import gal.udc.fic.prperez.pleste.service.exceptions.RESTExceptionSerializable;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.InvalidUserDataException;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserAlreadyExistsException;
@@ -62,13 +63,18 @@ public class UsersResource {
 	@Produces({MediaType.APPLICATION_JSON})
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns all users", responseCode = "200",
-					content = @Content(array = @ArraySchema(schema = @Schema(implementation =  Long.class))))
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation =  Long.class)))),
+			@ApiResponse(description = "skip is negative or count is lower than 1", responseCode = "400",
+					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
-	public List<Long> getAllUsers(@QueryParam("skip") Integer skip, @QueryParam("count") Integer count) {
+	public List<Long> getAllUsers(@QueryParam("skip") Integer skip, @QueryParam("count") Integer count) throws InvalidPaginationException {
 		if(count == null) {
 			return userDatabase.findAll().stream().map(User::getId).toList();
 		} else {
 			skip = skip == null ? 0 : skip;
+			if(skip < 0 || count < 1) {
+				throw new InvalidPaginationException(skip, count);
+			}
 
 			// skip é o número de usuarios que se saltan, non o número de páxina
 			int size = (int) Math.min((long) skip + count, Integer.MAX_VALUE);
