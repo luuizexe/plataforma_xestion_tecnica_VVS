@@ -4,7 +4,7 @@ import gal.udc.fic.prperez.pleste.service.dao.users.Roles;
 import gal.udc.fic.prperez.pleste.service.dao.users.SQLTokenDao;
 import gal.udc.fic.prperez.pleste.service.dao.users.User;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.IllegalActionForUserException;
-import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserNotFoundException;
+import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UnauthenticatedUserException;
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -26,7 +26,7 @@ public class AuthorizationManager implements ContainerRequestFilter {
 	}
 
 	@Override
-	public void filter(ContainerRequestContext requestContext) throws IllegalActionForUserException, UserNotFoundException {
+	public void filter(ContainerRequestContext requestContext) throws IllegalActionForUserException, UnauthenticatedUserException {
 		String token, path, method;
 		User user;
 
@@ -36,7 +36,7 @@ public class AuthorizationManager implements ContainerRequestFilter {
 
 		if( token == null || token.isEmpty() ) {
 			if(!(path.matches("users/login") || path.matches("openapi.json"))) {
-				throw new UserNotFoundException(token == null ? "" : token);
+				throw new UnauthenticatedUserException();
 			}
 		} else {
 			if (tokenDatabase.existsByToken(token)) {
@@ -54,7 +54,7 @@ public class AuthorizationManager implements ContainerRequestFilter {
 					}
 				}
 			} else {
-				throw new UserNotFoundException(token);
+				throw new UnauthenticatedUserException();
 			}
 		}
 	}
