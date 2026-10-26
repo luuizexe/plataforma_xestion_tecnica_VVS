@@ -59,6 +59,15 @@ public class UsersResource {
 		return HexFormat.of().formatHex(token);
 	}
 
+	// O path só admite díxitos, pero un número demasiado grande para un Long tampouco pode ser un usuario existente
+	private static Long parseId(String idParam) throws UserNotFoundException {
+		try {
+			return Long.parseLong(idParam);
+		} catch (NumberFormatException e) {
+			throw new UserNotFoundException(idParam);
+		}
+	}
+
 	@GET
 	@Produces({MediaType.APPLICATION_JSON})
 	@ApiResponses(value = {
@@ -167,7 +176,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public User getUser(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 
 		Optional<User> user = userDatabase.findById(id);
 		if(user.isPresent()) {
@@ -186,7 +195,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public User setUser(@PathParam("userId") String idParam, User user) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 
 		if(userDatabase.existsById(id)) {
 			user.setId(id);
@@ -205,7 +214,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void deleteUser(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 
 		if(userDatabase.existsById(id)) {
 			userDatabase.deleteById(id);
@@ -224,7 +233,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public Roles getUserRole(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 
 		if(userDatabase.existsById(id)) {
 			return userDatabase.getReferenceById(id).getRole();
@@ -242,7 +251,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void setUserRole(@PathParam("userId") String idParam, Roles role) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 
 		if(userDatabase.existsById(id)) {
 			User user = userDatabase.getReferenceById(id);
@@ -262,7 +271,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void logout(@PathParam("userId") String idParam, JSONString tokenArg) throws UserNotFoundException {
-		Long id = Long.parseLong(idParam);
+		Long id = parseId(idParam);
 		String token = tokenArg.toString();
 
 		if(userDatabase.existsById(id) &&
