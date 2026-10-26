@@ -197,8 +197,13 @@ public class UsersResource {
 	public User setUser(@PathParam("userId") String idParam, User user) throws UserNotFoundException {
 		Long id = parseId(idParam);
 
-		if(userDatabase.existsById(id)) {
+		Optional<User> stored = userDatabase.findById(id);
+		if(stored.isPresent()) {
 			user.setId(id);
+			// O hash non se envía ao cliente, así que se non chega un novo mantense o gardado
+			if(user.getPassword() == null) {
+				user.setPassword(stored.get().getPassword());
+			}
 			return userDatabase.save(user);
 		} else {
 			throw new UserNotFoundException(idParam);
