@@ -23,9 +23,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @Path( "/users")
 @Service
@@ -41,6 +42,7 @@ import java.util.Random;
 public class UsersResource {
 	private final SQLUserDao userDatabase;
 	private final SQLDaoFactoryUtil databaseFactory;
+	private final SecureRandom random = new SecureRandom();
 
 	public @Autowired UsersResource(SQLUserDao userDatabase, SQLDaoFactoryUtil databaseFactory) {
 		this.userDatabase = userDatabase;
@@ -48,17 +50,11 @@ public class UsersResource {
 	}
 
 	private String generateRandomToken() {
-		Random rand = new Random();
 		byte[] token = new byte[20];
-		StringBuilder hexToken = new StringBuilder();
 
-		rand.nextBytes(token);
+		random.nextBytes(token);
 
-		for(byte b : token) {
-			hexToken.append(Integer.toHexString(b));
-		}
-
-		return hexToken.toString();
+		return HexFormat.of().formatHex(token);
 	}
 
 	@GET
