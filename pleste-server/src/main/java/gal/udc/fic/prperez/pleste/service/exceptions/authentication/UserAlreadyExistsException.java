@@ -5,6 +5,6 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class UserAlreadyExistsException extends RESTException {
 	public UserAlreadyExistsException(String user) {
-		super("User " + user + " already exists", Status.BAD_REQUEST);
+		super("User " + user + " already exists", Status.CONFLICT);
 	}
 }

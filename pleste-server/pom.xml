@@ -85,6 +85,13 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        <!-- Necesario para que PIT lance as probas de JUnit 5 (mesma versión que junit-platform-engine) -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.11.0-RC1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -213,6 +220,43 @@
                     <consoleOutput>true</consoleOutput>
                     <failsOnError>false</failsOnError>
                     <linkXRef>false</linkXRef>
+                </configuration>
+            </plugin>
+            <!-- Probas de mutación: mvn test-compile org.pitest:pitest-maven:mutationCoverage -> target/pit-reports -->
+            <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <version>1.17.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-junit5-plugin</artifactId>
+                        <version>1.2.1</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <targetClasses>
+                        <param>gal.udc.fic.prperez.pleste.service.*</param>
+                    </targetClasses>
+                    <excludedClasses>
+                        <!-- Clases xeradas por ANTLR a partir de Find.g4 e punto de entrada -->
+                        <param>gal.udc.fic.prperez.pleste.service.Find*</param>
+                        <param>gal.udc.fic.prperez.pleste.service.Application</param>
+                    </excludedClasses>
+                    <targetTests>
+                        <param>gal.udc.fic.prperez.pleste.*</param>
+                    </targetTests>
+                    <!-- Só probas de unidade: as de integración levantan o servidor e fan a análise moi lenta -->
+                    <excludedTestClasses>
+                        <param>*IT</param>
+                    </excludedTestClasses>
+                    <threads>4</threads>
+                    <timestampedReports>false</timestampedReports>
+                    <outputFormats>
+                        <outputFormat>HTML</outputFormat>
+                        <outputFormat>XML</outputFormat>
+                        <outputFormat>CSV</outputFormat>
+                    </outputFormats>
                 </configuration>
             </plugin>
         </plugins>
