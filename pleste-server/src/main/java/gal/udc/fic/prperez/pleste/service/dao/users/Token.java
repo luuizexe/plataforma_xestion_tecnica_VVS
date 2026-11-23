@@ -52,12 +52,11 @@ public class Token {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (!(o instanceof Token token)) return false;
-		// Dous tokens sen gardar (id nulo) só son iguais se son o mesmo obxecto
-		return id != null && Objects.equals(id, token.id);
+		return Objects.equals(id, token.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return getClass().hashCode();
+		return Objects.hashCode(id);
 	}
 }

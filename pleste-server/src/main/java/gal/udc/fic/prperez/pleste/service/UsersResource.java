@@ -2,9 +2,7 @@ package gal.udc.fic.prperez.pleste.service;
 
 import gal.udc.fic.prperez.pleste.service.dao.SQLDaoFactoryUtil;
 import gal.udc.fic.prperez.pleste.service.dao.users.*;
-import gal.udc.fic.prperez.pleste.service.exceptions.InvalidPaginationException;
 import gal.udc.fic.prperez.pleste.service.exceptions.RESTExceptionSerializable;
-import gal.udc.fic.prperez.pleste.service.exceptions.authentication.InvalidUserDataException;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserAlreadyExistsException;
 import gal.udc.fic.prperez.pleste.service.exceptions.authentication.UserNotFoundException;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -25,10 +23,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
-import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Path( "/users")
 @Service
@@ -44,7 +41,6 @@ import java.util.Optional;
 public class UsersResource {
 	private final SQLUserDao userDatabase;
 	private final SQLDaoFactoryUtil databaseFactory;
-	private final SecureRandom random = new SecureRandom();
 
 	public @Autowired UsersResource(SQLUserDao userDatabase, SQLDaoFactoryUtil databaseFactory) {
 		this.userDatabase = userDatabase;
@@ -52,44 +48,34 @@ public class UsersResource {
 	}
 
 	private String generateRandomToken() {
+		Random rand = new Random();
 		byte[] token = new byte[20];
+		StringBuilder hexToken = new StringBuilder();
 
-		random.nextBytes(token);
+		rand.nextBytes(token);
 
-		return HexFormat.of().formatHex(token);
-	}
-
-	// O path só admite díxitos, pero un número demasiado grande para un Long tampouco pode ser un usuario existente
-	private static Long parseId(String idParam) throws UserNotFoundException {
-		try {
-			return Long.parseLong(idParam);
-		} catch (NumberFormatException e) {
-			throw new UserNotFoundException(idParam);
+		for(byte b : token) {
+			hexToken.append(Integer.toHexString(b));
 		}
+
+		return hexToken.toString();
 	}
 
 	@GET
 	@Produces({MediaType.APPLICATION_JSON})
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns all users", responseCode = "200",
-					content = @Content(array = @ArraySchema(schema = @Schema(implementation =  Long.class)))),
-			@ApiResponse(description = "skip is negative or count is lower than 1", responseCode = "400",
-					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
+					content = @Content(array = @ArraySchema(schema = @Schema(implementation =  Long.class))))
 	})
-	public List<Long> getAllUsers(@QueryParam("skip") Integer skip, @QueryParam("count") Integer count) throws InvalidPaginationException {
+	public List<Long> getAllUsers(@QueryParam("skip") Integer skip, @QueryParam("count") Integer count) {
 		if(count == null) {
 			return userDatabase.findAll().stream().map(User::getId).toList();
 		} else {
 			skip = skip == null ? 0 : skip;
-			if(skip < 0 || count < 1) {
-				throw new InvalidPaginationException(skip, count);
-			}
 
-			// skip é o número de usuarios que se saltan, non o número de páxina
-			int size = (int) Math.min((long) skip + count, Integer.MAX_VALUE);
-			Pageable page = PageRequest.of(0, size, Sort.by("id"));
+			Pageable page = PageRequest.of(skip, count, Sort.by("id"));
 
-			return userDatabase.findAll(page).stream().skip(skip).map(User::getId).toList();
+			return userDatabase.findAll(page).stream().map(User::getId).toList();
 		}
 	}
 
@@ -99,18 +85,10 @@ public class UsersResource {
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns created user ID", responseCode = "200",
 					content = @Content(schema = @Schema(implementation = Long.class))),
-			@ApiResponse(description = "The username or the password are missing", responseCode = "400",
-					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class))),
 			@ApiResponse(description = "A user with the same name already exists", responseCode = "409",
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
-	public Long addUser(User user) throws UserAlreadyExistsException, InvalidUserDataException {
-		if(user.getUsername() == null || user.getUsername().isBlank()) {
-			throw new InvalidUserDataException("username");
-		}
-		if(user.getPassword() == null || user.getPassword().isEmpty()) {
-			throw new InvalidUserDataException("password");
-		}
+	public Long addUser(User user) throws UserAlreadyExistsException {
 		if(userDatabase.existsByUsername(user.getUsername())) {
 			throw new UserAlreadyExistsException(user.getUsername());
 		}
@@ -125,15 +103,10 @@ public class UsersResource {
 	@ApiResponses(value = {
 			@ApiResponse(description = "Returns a randomly generated token", responseCode = "200",
 					content = @Content(schema = @Schema(implementation = JSONString.class))),
-			@ApiResponse(description = "The password is missing", responseCode = "400",
-					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class))),
 			@ApiResponse(description = "User not found, or password doesn't match", responseCode = "404",
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
-	public JSONString login(@QueryParam("user") String username, JSONString passwordArg) throws UserNotFoundException, InvalidUserDataException {
-		if(passwordArg == null || passwordArg.toString() == null) {
-			throw new InvalidUserDataException("password");
-		}
+	public JSONString login(@QueryParam("user") String username, JSONString passwordArg) throws UserNotFoundException {
 		String password = passwordArg.toString();
 		if(userDatabase.existsByUsername(username)) {
 			User user = userDatabase.getByUsername(username);
@@ -176,7 +149,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public User getUser(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 
 		Optional<User> user = userDatabase.findById(id);
 		if(user.isPresent()) {
@@ -195,15 +168,10 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public User setUser(@PathParam("userId") String idParam, User user) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 
-		Optional<User> stored = userDatabase.findById(id);
-		if(stored.isPresent()) {
+		if(userDatabase.existsById(id)) {
 			user.setId(id);
-			// O hash non se envía ao cliente, así que se non chega un novo mantense o gardado
-			if(user.getPassword() == null) {
-				user.setPassword(stored.get().getPassword());
-			}
 			return userDatabase.save(user);
 		} else {
 			throw new UserNotFoundException(idParam);
@@ -219,12 +187,9 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void deleteUser(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 
 		if(userDatabase.existsById(id)) {
-			// Os tokens apuntan ao usuario, así que hai que borralos antes
-			SQLTokenDao tokenDatabase = databaseFactory.getSqlTokenDao();
-			tokenDatabase.deleteAll(tokenDatabase.findByUser(userDatabase.getReferenceById(id)));
 			userDatabase.deleteById(id);
 		} else {
 			throw new UserNotFoundException(idParam);
@@ -241,7 +206,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public Roles getUserRole(@PathParam("userId") String idParam) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 
 		if(userDatabase.existsById(id)) {
 			return userDatabase.getReferenceById(id).getRole();
@@ -259,7 +224,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void setUserRole(@PathParam("userId") String idParam, Roles role) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 
 		if(userDatabase.existsById(id)) {
 			User user = userDatabase.getReferenceById(id);
@@ -279,7 +244,7 @@ public class UsersResource {
 					content = @Content(schema = @Schema(implementation = RESTExceptionSerializable.class)))
 	})
 	public void logout(@PathParam("userId") String idParam, JSONString tokenArg) throws UserNotFoundException {
-		Long id = parseId(idParam);
+		Long id = Long.parseLong(idParam);
 		String token = tokenArg.toString();
 
 		if(userDatabase.existsById(id) &&
