@@ -228,6 +228,16 @@
                     <linkXRef>false</linkXRef>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.8.6.6</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>false</failOnError>
+                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                    <xmlOutput>true</xmlOutput>
             <!-- Probas de mutación: mvn test-compile org.pitest:pitest-maven:mutationCoverage -> target/pit-reports -->
             <plugin>
                 <groupId>org.pitest</groupId>

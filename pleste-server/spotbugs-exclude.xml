@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--fichero de exclusión de filtros para suprimir el ruido y los falsos positivos-->
+<FindBugsFilter>
+    <!-- Excluir clases generadas automáticamente por ANTLR4 -->
+    <Match>
+        <Class name="~gal\.udc\.fic\.prperez\.pleste\.service\.Find(Lexer|Parser).*" />
+    </Match>
+
+    <!-- Excluir advertencias de exposicion de mutables en entidades JPA y DAOs -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2" />
+        <Or>
+            <Package name="gal.udc.fic.prperez.pleste.service.dao.template" />
+            <Package name="gal.udc.fic.prperez.pleste.service.dao.component" />
+            <Package name="gal.udc.fic.prperez.pleste.service.dao.users" />
+            <Class name="gal.udc.fic.prperez.pleste.service.dao.SQLDaoFactoryUtil" />
+            <Class name="gal.udc.fic.prperez.pleste.service.AuthorizationManager" />
+        </Or>
+    </Match>
+</FindBugsFilter>
