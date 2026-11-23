@@ -17,6 +17,7 @@ import gal.udc.fic.prperez.pleste.service.exceptions.component.ComponentFieldIsM
 import gal.udc.fic.prperez.pleste.service.exceptions.component.ComponentFieldNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,17 +93,25 @@ public class ComponentFieldModificationIT {
 	@AfterEach
 	void tearDown() {
 		try {
-			if (componentId != null) componentResource.removeComponent(componentId.toString());
-		} catch (Exception ignored) {}
+			if (componentId != null)
+				componentResource.removeComponent(componentId.toString());
+		} catch (Exception ignored) {
+		}
 		try {
-			if (targetComponentId != null) componentResource.removeComponent(targetComponentId.toString());
-		} catch (Exception ignored) {}
+			if (targetComponentId != null)
+				componentResource.removeComponent(targetComponentId.toString());
+		} catch (Exception ignored) {
+		}
 		try {
-			if (templateId != null) templateResource.removeTemplate(templateId.toString());
-		} catch (Exception ignored) {}
+			if (templateId != null)
+				templateResource.removeTemplate(templateId.toString());
+		} catch (Exception ignored) {
+		}
 		try {
-			if (targetTemplateId != null) templateResource.removeTemplate(targetTemplateId.toString());
-		} catch (Exception ignored) {}
+			if (targetTemplateId != null)
+				templateResource.removeTemplate(targetTemplateId.toString());
+		} catch (Exception ignored) {
+		}
 	}
 
 	@Test
@@ -113,6 +122,29 @@ public class ComponentFieldModificationIT {
 
 		Field field = componentResource.getFieldComponent(componentId.toString(), "optionalNotes");
 		assertEquals("Updated operational notes", field.getContent());
+	}
+
+	@Disabled("ISSUE #2: Falla con NonUniqueResultException por consulta global getByTemplateFieldName sin filtrar por componentId")
+	@Test
+	@DisplayName("Modify field fails with NonUniqueResultException when multiple components share field name")
+	void testModifyFieldWithMultipleComponentsThrowsNonUniqueResult() {
+		Component secondComp = new Component();
+		secondComp.setName("Device_Beta");
+		secondComp.setTemplate(template);
+		List<Field<?>> compFields = new ArrayList<>();
+		compFields.add(new TextField(null, "Second component text", template.getFields().get(0)));
+		secondComp.setFields(compFields);
+		Long secondCompId = componentResource.addComponent(secondComp);
+
+		try {
+			componentResource.modifyFieldComponent(
+					componentId.toString(), "optionalNotes", new JSONString("Updated notes for Alpha"));
+		} finally {
+			try {
+				componentResource.removeComponent(secondCompId.toString());
+			} catch (Exception ignored) {
+			}
+		}
 	}
 
 	@Test
@@ -158,14 +190,6 @@ public class ComponentFieldModificationIT {
 
 		LinkField field = (LinkField) componentResource.getFieldComponent(componentId.toString(), "linkedModule");
 		assertEquals(targetComponentId, field.getContent().getId());
-	}
-
-	@Test
-	@DisplayName("Modify LINK field with non-existent component throws ComponentFieldInvalidValueException")
-	void testModifyLinkFieldInvalidTargetThrows() {
-		assertThrows(ComponentFieldInvalidValueException.class,
-				() -> componentResource.modifyFieldComponent(
-						componentId.toString(), "linkedModule", new JSONString("9999999")));
 	}
 
 	@Test

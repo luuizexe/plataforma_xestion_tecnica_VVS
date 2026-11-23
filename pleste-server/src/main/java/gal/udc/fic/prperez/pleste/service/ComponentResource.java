@@ -96,9 +96,7 @@ public class ComponentResource {
 	public Long addComponent(Component component) throws TemplateNotFoundException, ComponentFieldIsMandatoryException {
 		if(component.getTemplate() == null ||
 				!databaseFactory.getSqlTemplateDao().existsById(component.getTemplate().getId())) {
-			throw new TemplateNotFoundException(
-					component.getTemplate() == null ? "" : (component.getTemplate().getId() == null ? "" : component.getTemplate().getId().toString()),
-					component.getTemplate() == null ? "" : component.getTemplate().getName());
+			throw new TemplateNotFoundException(component.getTemplate() == null ? "" : component.getTemplate().getId().toString(), component.getTemplate().getName());
 		}
 
 		//Check if fields are consistent between Template and Component
@@ -307,13 +305,9 @@ public class ComponentResource {
 					}
 					case LINK -> {
 						try {
-							Long targetId = Long.parseLong(valueString.getContent());
-							if (!databaseFactory.getSqlComponentDao().existsById(targetId)) {
-								throw new ComponentFieldInvalidValueException(fieldName, "LINK", valueString.getContent());
-							}
-							Component value = databaseFactory.getSqlComponentDao().getReferenceById(targetId);
+							Component value = databaseFactory.getSqlComponentDao().getReferenceById(Long.parseLong(valueString.getContent()));
 							((LinkField) componentField).setContent(value);
-						} catch (NumberFormatException | EntityNotFoundException e) {
+						} catch (EntityNotFoundException e) {
 							throw new ComponentFieldInvalidValueException(fieldName, "LINK", valueString.getContent());
 						}
 					}
@@ -321,7 +315,7 @@ public class ComponentResource {
 						try {
 							BigDecimal value = new BigDecimal(valueString.getContent());
 							((NumberField) componentField).setContent(value);
-						} catch (NumberFormatException e) {
+						} catch (EntityNotFoundException e) {
 							throw new ComponentFieldInvalidValueException(fieldName, "NUMBER", valueString.getContent());
 						}
 					}
