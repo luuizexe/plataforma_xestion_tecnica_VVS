@@ -101,7 +101,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("Without session a protected request is rejected with 401")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testNoSessionProtectedRequest() {
 		assertEquals(401, api.status("GET", "/templates", null));
 	}
@@ -120,7 +120,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("Login is still possible when the client sends an expired token")
-	@Disabled("Known bug: login is rejected when the request carries an expired or another session's token")
+	@Disabled("Bug conocido: el login se rechaza si la petición lleva un token caducado o de otra sesión")
 	void testLoginWithExpiredToken() {
 		String expired = api.login(username, PASSWORD);
 		logout(userId, expired);
@@ -203,7 +203,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("After logout the token is rejected with 401")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testLogoutClosesSession() {
 		String token = api.login(username, PASSWORD);
 		logout(userId, token);
@@ -212,7 +212,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("After logout an administrator token is rejected with 401")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testAdministratorLogoutClosesSession() {
 		String adminName = unique("admin");
 		Long adminId = createUser(adminName, Roles.ADMINISTRATOR);
@@ -223,7 +223,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("Logging out twice with the same token is rejected with 401")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testLogoutTwice() {
 		String token = api.login(username, PASSWORD);
 		logout(userId, token);
@@ -253,7 +253,7 @@ public class SessionStateIT {
 
 	@Test
 	@DisplayName("Deleting a logged user closes its session")
-	@Disabled("Known bug: deleting a user with session tokens fails with 500 (foreign key violation)")
+	@Disabled("Bugs conocidos: borrar un usuario con tokens de sesión falla con 500 por la clave foránea, y un token desconocido responde 404 en lugar de 401")
 	void testDeletedUserLosesSession() {
 		String token = api.login(username, PASSWORD);
 		api.status("DELETE", "/users/" + userId, adminToken);

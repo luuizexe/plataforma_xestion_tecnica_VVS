@@ -137,14 +137,14 @@ public class TokenTest {
 
 	@Test
 	@DisplayName("Two different unsaved tokens are not equal")
-	@Disabled("Known bug: Token.equals considers equal two different unsaved tokens")
+	@Disabled("Bug conocido: Token.equals considera iguales dos tokens distintos sin guardar")
 	void testEqualsTwoUnsavedTokens() {
 		assertNotEquals(new Token(null, OWNER, "abc"), new Token(null, OWNER, "def"));
 	}
 
 	@Test
 	@DisplayName("Two different unsaved tokens are both kept in a set")
-	@Disabled("Known bug: Token.equals considers equal two different unsaved tokens")
+	@Disabled("Bug conocido: Token.equals considera iguales dos tokens distintos sin guardar")
 	void testUnsavedTokensInSet() {
 		Set<Token> tokens = new HashSet<>();
 		tokens.add(new Token(null, OWNER, "abc"));

@@ -167,7 +167,7 @@ public class UserTest {
 
 	@Test
 	@DisplayName("Serialized user does not expose the password hash")
-	@Disabled("Known bug: the password hash is exposed in the user JSON responses")
+	@Disabled("Bug conocido: el hash de la contraseña aparece en las respuestas JSON de usuario")
 	void testJsonDoesNotExposePassword() throws JsonProcessingException {
 		String json = new ObjectMapper().writeValueAsString(fullUser());
 		assertFalse(json.contains("password"));

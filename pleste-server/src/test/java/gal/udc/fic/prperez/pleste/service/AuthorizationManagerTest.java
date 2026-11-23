@@ -93,7 +93,7 @@ public class AuthorizationManagerTest {
 	@ParameterizedTest
 	@ValueSource(strings = {"unknown", NORMAL_TOKEN, ADMIN_TOKEN})
 	@DisplayName("Login is allowed with any token, even an expired one")
-	@Disabled("Known bug: login is rejected when the request carries an expired or another session's token")
+	@Disabled("Bug conocido: el login se rechaza si la petición lleva un token caducado o de otra sesión")
 	void testLoginWithAnyToken(String token) {
 		assertDoesNotThrow(request(token, "POST", "users/login"));
 	}
@@ -116,14 +116,14 @@ public class AuthorizationManagerTest {
 			"GET, users/login/extra"
 	})
 	@DisplayName("Any other request without token answers 401 Unauthorized")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testRequestWithoutToken(String method, String path) {
 		assertEquals(401, statusOf(request(null, method, path)));
 	}
 
 	@Test
 	@DisplayName("A request with an empty token answers 401 Unauthorized")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testRequestWithEmptyToken() {
 		assertEquals(401, statusOf(request("", "GET", "templates")));
 	}
@@ -131,7 +131,7 @@ public class AuthorizationManagerTest {
 	@ParameterizedTest
 	@ValueSource(strings = {"unknown", "ADMIN-TOKEN", "admin-token "})
 	@DisplayName("A request with an unknown token answers 401 Unauthorized")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testRequestWithUnknownToken(String token) {
 		assertEquals(401, statusOf(request(token, "GET", "templates")));
 	}
@@ -205,14 +205,14 @@ public class AuthorizationManagerTest {
 
 	@Test
 	@DisplayName("A normal user cannot change roles (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testNormalUserCannotChangeRole() {
 		assertEquals(403, statusOf(request(NORMAL_TOKEN, "PUT", "users/1/role")));
 	}
 
 	@Test
 	@DisplayName("A normal user cannot delete users (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testNormalUserCannotDeleteUsers() {
 		assertEquals(403, statusOf(request(NORMAL_TOKEN, "DELETE", "users/3")));
 	}
@@ -236,21 +236,21 @@ public class AuthorizationManagerTest {
 
 	@Test
 	@DisplayName("A user without role can read templates like a normal user")
-	@Disabled("Known bug: AuthorizationManager throws NullPointerException with users without role")
+	@Disabled("Bug conocido: AuthorizationManager lanza NullPointerException con usuarios sin rol")
 	void testNoRoleReadsTemplates() {
 		assertDoesNotThrow(request(NO_ROLE_TOKEN, "GET", "templates"));
 	}
 
 	@Test
 	@DisplayName("A user without role cannot modify templates (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: AuthorizationManager lanza NullPointerException con usuarios sin rol")
 	void testNoRoleCannotModifyTemplates() {
 		assertEquals(403, statusOf(request(NO_ROLE_TOKEN, "POST", "templates")));
 	}
 
 	@Test
 	@DisplayName("A user without role cannot change roles (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: AuthorizationManager lanza NullPointerException con usuarios sin rol")
 	void testNoRoleCannotChangeRole() {
 		assertEquals(403, statusOf(request(NO_ROLE_TOKEN, "PUT", "users/1/role")));
 	}

@@ -125,7 +125,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("getAllUsers skips the given number of users, not pages")
-	@Disabled("Known bug: getAllUsers interprets skip as a page number instead of an offset")
+	@Disabled("Bug conocido: getAllUsers interpreta skip como número de página y no como desplazamiento")
 	void testGetAllUsersSkipIsAnOffset() {
 		givenPagedUsers(6);
 		assertEquals(List.of(3L, 4L), resource.getAllUsers(2, 2));
@@ -133,7 +133,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("getAllUsers returns the last partial page")
-	@Disabled("Known bug: getAllUsers interprets skip as a page number instead of an offset")
+	@Disabled("Bug conocido: getAllUsers interpreta skip como número de página y no como desplazamiento")
 	void testGetAllUsersLastPartialPage() {
 		givenPagedUsers(6);
 		assertEquals(List.of(6L), resource.getAllUsers(5, 2));
@@ -157,7 +157,7 @@ public class UsersResourceTest {
 	@ParameterizedTest
 	@ValueSource(ints = {0, -1, Integer.MIN_VALUE})
 	@DisplayName("getAllUsers with a count lower than 1 is a bad request")
-	@Disabled("Known bug: getAllUsers answers 500 instead of 400 with a negative skip or a count lower than 1")
+	@Disabled("Bug conocido: getAllUsers responde 500 en lugar de 400 con skip negativo o count menor que 1")
 	void testGetAllUsersInvalidCount(int count) {
 		assertEquals(400, statusOf(() -> resource.getAllUsers(0, count)));
 	}
@@ -165,7 +165,7 @@ public class UsersResourceTest {
 	@ParameterizedTest
 	@ValueSource(ints = {-1, Integer.MIN_VALUE})
 	@DisplayName("getAllUsers with a negative skip is a bad request")
-	@Disabled("Known bug: getAllUsers answers 500 instead of 400 with a negative skip or a count lower than 1")
+	@Disabled("Bug conocido: getAllUsers responde 500 en lugar de 400 con skip negativo o count menor que 1")
 	void testGetAllUsersNegativeSkip(int skip) {
 		assertEquals(400, statusOf(() -> resource.getAllUsers(skip, 2)));
 	}
@@ -194,7 +194,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("addUser with an existing username answers 409 Conflict as documented")
-	@Disabled("Known bug: creating an existing user answers 400 instead of the documented 409 Conflict")
+	@Disabled("Bug conocido: crear un usuario que ya existe responde 400 en lugar del 409 Conflict documentado")
 	void testAddUserDuplicatedIsConflict() {
 		when(userDatabase.existsByUsername("alice")).thenReturn(true);
 		assertEquals(409, statusOf(() -> resource.addUser(user(1, "alice"))));
@@ -212,7 +212,7 @@ public class UsersResourceTest {
 	@NullAndEmptySource
 	@ValueSource(strings = {"   ", "\t"})
 	@DisplayName("addUser without a username is a bad request")
-	@Disabled("Known bug: users without username or password are accepted instead of answering 400")
+	@Disabled("Bug conocido: se aceptan usuarios sin nombre o sin contraseña en lugar de responder 400")
 	void testAddUserWithoutUsername(String username) {
 		lenient().when(userDatabase.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		assertEquals(400, statusOf(() -> resource.addUser(new User(null, username, "x@udc.es", passwordHash, Roles.NORMAL_USER))));
@@ -221,7 +221,7 @@ public class UsersResourceTest {
 	@ParameterizedTest
 	@NullAndEmptySource
 	@DisplayName("addUser without a password is a bad request")
-	@Disabled("Known bug: users without username or password are accepted instead of answering 400")
+	@Disabled("Bug conocido: se aceptan usuarios sin nombre o sin contraseña en lugar de responder 400")
 	void testAddUserWithoutPassword(String password) {
 		lenient().when(userDatabase.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		assertEquals(400, statusOf(() -> resource.addUser(new User(null, "alice", "x@udc.es", password, Roles.NORMAL_USER))));
@@ -233,7 +233,7 @@ public class UsersResourceTest {
 
 	@RepeatedTest(10)
 	@DisplayName("login returns a 40 character hexadecimal token")
-	@Disabled("Known bug: generated tokens are not 40 character hexadecimal strings")
+	@Disabled("Bug conocido: los tokens generados no son cadenas hexadecimales de 40 caracteres")
 	void testLoginTokenFormat() {
 		givenExistingUser(user(1, "alice"));
 		when(tokenDatabase.save(any(Token.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -301,7 +301,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("login without body is a bad request")
-	@Disabled("Known bug: login without password answers 500 instead of 400")
+	@Disabled("Bug conocido: el login sin contraseña responde 500 en lugar de 400")
 	void testLoginWithoutBody() {
 		lenient().when(userDatabase.existsByUsername("alice")).thenReturn(true);
 		lenient().when(userDatabase.getByUsername("alice")).thenReturn(user(1, "alice"));
@@ -310,7 +310,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("login with a null password is a bad request")
-	@Disabled("Known bug: login without password answers 500 instead of 400")
+	@Disabled("Bug conocido: el login sin contraseña responde 500 en lugar de 400")
 	void testLoginNullPassword() {
 		lenient().when(userDatabase.existsByUsername("alice")).thenReturn(true);
 		lenient().when(userDatabase.getByUsername("alice")).thenReturn(user(1, "alice"));
@@ -357,7 +357,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("getUser with an id bigger than a long throws UserNotFoundException")
-	@Disabled("Known bug: an id that does not fit in a Long answers 500 (NumberFormatException) instead of 404")
+	@Disabled("Bug conocido: un id que no cabe en un Long responde 500 (NumberFormatException) en lugar de 404")
 	void testGetUserIdOverflow() {
 		assertThrows(UserNotFoundException.class, () -> resource.getUser(TOO_BIG_ID));
 	}
@@ -413,7 +413,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("setUser without password keeps the stored password")
-	@Disabled("Known bug: modifying a user without password erases the stored password")
+	@Disabled("Bug conocido: modificar un usuario sin contraseña borra la contraseña guardada")
 	void testSetUserWithoutPasswordKeepsPassword() {
 		givenStoredUser(user(3, "alice"));
 		resource.setUser("3", new User(null, "alice", "alice@udc.es", null, Roles.NORMAL_USER));
@@ -435,7 +435,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("setUser with an id bigger than a long throws UserNotFoundException")
-	@Disabled("Known bug: an id that does not fit in a Long answers 500 (NumberFormatException) instead of 404")
+	@Disabled("Bug conocido: un id que no cabe en un Long responde 500 (NumberFormatException) en lugar de 404")
 	void testSetUserIdOverflow() {
 		assertThrows(UserNotFoundException.class, () -> resource.setUser(TOO_BIG_ID, user(3, "alice")));
 	}
@@ -454,7 +454,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("deleteUser deletes the session tokens of the user")
-	@Disabled("Known bug: deleting a user with session tokens fails with 500 (foreign key violation)")
+	@Disabled("Bug conocido: borrar un usuario con tokens de sesión falla con 500 por la clave foránea")
 	void testDeleteUserDeletesTokens() {
 		User alice = user(3, "alice");
 		List<Token> tokens = List.of(new Token(1L, alice, "abc"), new Token(2L, alice, "def"));
@@ -479,7 +479,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("deleteUser with an id bigger than a long throws UserNotFoundException")
-	@Disabled("Known bug: an id that does not fit in a Long answers 500 (NumberFormatException) instead of 404")
+	@Disabled("Bug conocido: un id que no cabe en un Long responde 500 (NumberFormatException) en lugar de 404")
 	void testDeleteUserIdOverflow() {
 		assertThrows(UserNotFoundException.class, () -> resource.deleteUser(TOO_BIG_ID));
 	}
@@ -504,7 +504,7 @@ public class UsersResourceTest {
 
 	@Test
 	@DisplayName("getUserRole with an id bigger than a long throws UserNotFoundException")
-	@Disabled("Known bug: an id that does not fit in a Long answers 500 (NumberFormatException) instead of 404")
+	@Disabled("Bug conocido: un id que no cabe en un Long responde 500 (NumberFormatException) en lugar de 404")
 	void testGetUserRoleIdOverflow() {
 		assertThrows(UserNotFoundException.class, () -> resource.getUserRole(TOO_BIG_ID));
 	}

@@ -119,7 +119,7 @@ public class AuthorizationIT {
 			"GET, /search/templates?query=name"
 	})
 	@DisplayName("A request without token answers 401 Unauthorized")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testRequestWithoutToken(String method, String path) {
 		assertEquals(401, api.status(method, path, null));
 	}
@@ -127,7 +127,7 @@ public class AuthorizationIT {
 	@ParameterizedTest
 	@ValueSource(strings = {"", "unknown-token", "0123456789abcdef0123456789abcdef01234567"})
 	@DisplayName("A request with an empty or unknown token answers 401 Unauthorized")
-	@Disabled("Known bug: a missing or unknown token answers 404 Not Found instead of 401 Unauthorized")
+	@Disabled("Bug conocido: sin token o con un token desconocido responde 404 Not Found en lugar de 401 Unauthorized")
 	void testRequestWithInvalidToken(String token) {
 		assertEquals(401, api.status("GET", "/templates", token));
 	}
@@ -163,7 +163,7 @@ public class AuthorizationIT {
 
 	@Test
 	@DisplayName("A user read by a normal user does not contain the password hash")
-	@Disabled("Known bug: the password hash is exposed in the user JSON responses")
+	@Disabled("Bug conocido: el hash de la contraseña aparece en las respuestas JSON de usuario")
 	void testNormalUserDoesNotSeePasswordHash() {
 		HttpResponse<String> response = api.send("GET", "/users/" + otherId, normalToken, null);
 		assertFalse(response.body().contains("password"));
@@ -183,14 +183,14 @@ public class AuthorizationIT {
 
 	@Test
 	@DisplayName("A normal user cannot promote itself to administrator (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testNormalUserCannotPromoteItself() {
 		assertEquals(403, api.status("PUT", "/users/" + normalId + "/role", normalToken, Roles.ADMINISTRATOR));
 	}
 
 	@Test
 	@DisplayName("After a forbidden promotion the role of the normal user is unchanged")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testNormalUserRoleUnchangedAfterForbiddenPromotion() {
 		api.status("PUT", "/users/" + normalId + "/role", normalToken, Roles.ADMINISTRATOR);
 		assertEquals(Roles.NORMAL_USER, usersResource.getUserRole(normalId.toString()));
@@ -198,14 +198,14 @@ public class AuthorizationIT {
 
 	@Test
 	@DisplayName("A normal user cannot delete another user (403 Forbidden)")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testNormalUserCannotDeleteUser() {
 		assertEquals(403, api.status("DELETE", "/users/" + otherId, normalToken));
 	}
 
 	@Test
 	@DisplayName("After a forbidden deletion the other user still exists")
-	@Disabled("Known bug: a normal user can change roles and delete users")
+	@Disabled("Bug conocido: un usuario normal puede cambiar roles y borrar usuarios")
 	void testUserStillExistsAfterForbiddenDeletion() {
 		api.status("DELETE", "/users/" + otherId, normalToken);
 		assertDoesNotThrow(() -> usersResource.getUser(otherId.toString()));
@@ -250,7 +250,7 @@ public class AuthorizationIT {
 
 	@Test
 	@DisplayName("An administrator can delete a user that has an open session")
-	@Disabled("Known bug: deleting a user with session tokens fails with 500 (foreign key violation)")
+	@Disabled("Bug conocido: borrar un usuario con tokens de sesión falla con 500 por la clave foránea")
 	void testAdministratorCanDeleteUserWithSession() {
 		assertEquals(204, api.status("DELETE", "/users/" + normalId, adminToken));
 	}

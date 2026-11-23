@@ -124,7 +124,7 @@ public class UsersResourceIT {
 
 	@Test
 	@DisplayName("Paginating past the end with a big count returns the remaining users")
-	@Disabled("Known bug: getAllUsers interprets skip as a page number instead of an offset")
+	@Disabled("Bug conocido: getAllUsers interpreta skip como número de página y no como desplazamiento")
 	void testPaginationRemainingUsers() {
 		createUser("bob");
 		List<Long> all = usersResource.getAllUsers(null, null).stream().sorted().toList();
@@ -133,7 +133,7 @@ public class UsersResourceIT {
 
 	@Test
 	@DisplayName("Consecutive pages do not overlap nor leave gaps")
-	@Disabled("Known bug: getAllUsers interprets skip as a page number instead of an offset")
+	@Disabled("Bug conocido: getAllUsers interpreta skip como número de página y no como desplazamiento")
 	void testPaginationConsecutivePages() {
 		createUser("bob");
 		createUser("carol");
@@ -159,7 +159,7 @@ public class UsersResourceIT {
 
 	@Test
 	@DisplayName("Modifying a user without password keeps the old password valid")
-	@Disabled("Known bug: modifying a user without password erases the stored password")
+	@Disabled("Bug conocido: modificar un usuario sin contraseña borra la contraseña guardada")
 	void testModifyWithoutPasswordKeepsLogin() {
 		String newName = unique("alice_renamed");
 		usersResource.setUser(aliceId.toString(), new User(null, newName, "alice@udc.es", null, Roles.NORMAL_USER));
@@ -187,7 +187,7 @@ public class UsersResourceIT {
 
 	@Test
 	@DisplayName("A user with an open session can be deleted")
-	@Disabled("Known bug: deleting a user with session tokens fails with 500 (foreign key violation)")
+	@Disabled("Bug conocido: borrar un usuario con tokens de sesión falla con 500 por la clave foránea")
 	void testDeleteUserWithSession() {
 		login(aliceId);
 		usersResource.deleteUser(aliceId.toString());
@@ -196,7 +196,7 @@ public class UsersResourceIT {
 
 	@Test
 	@DisplayName("Deleting a user removes its session tokens")
-	@Disabled("Known bug: deleting a user with session tokens fails with 500 (foreign key violation)")
+	@Disabled("Bug conocido: borrar un usuario con tokens de sesión falla con 500 por la clave foránea")
 	void testDeleteUserRemovesTokens() {
 		String token = login(aliceId);
 		try {
