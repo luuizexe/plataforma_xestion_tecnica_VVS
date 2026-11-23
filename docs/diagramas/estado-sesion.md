@@ -50,3 +50,9 @@ Las transiciones se prueban en `SessionStateIT` sobre los endpoints HTTP reales.
 | Con sesión | Logout con el id de otro usuario | Con sesión (404) | `testLogoutWithAnotherUserId`, `testLogoutWithAnotherUserIdKeepsSession` |
 | Con sesión | Otra sesión del mismo usuario hace logout | Con sesión | `testTwoIndependentSessions` |
 | Con sesión | El usuario es eliminado | Sin sesión (401) | `testDeletedUserLosesSession` |
+
+El diagrama describe el comportamiento esperado, no el actual. Los errores que se encontraron no se han corregido, así que estas pruebas están desactivadas con `@Disabled` hasta que se arreglen:
+
+- `testNoSessionProtectedRequest`, `testLogoutClosesSession`, `testAdministratorLogoutClosesSession` y `testLogoutTwice`: sin token, o con un token desconocido, el servidor responde 404 en lugar de 401.
+- `testLoginWithExpiredToken`: el login se rechaza si la petición lleva un token caducado.
+- `testDeletedUserLosesSession`: borrar un usuario con sesión abierta falla con 500 por la clave foránea de sus tokens.
