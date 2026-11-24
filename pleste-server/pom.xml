@@ -238,6 +238,8 @@
                     <failOnError>false</failOnError>
                     <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
                     <xmlOutput>true</xmlOutput>
+                </configuration>
+            </plugin>
             <!-- Probas de mutación: mvn test-compile org.pitest:pitest-maven:mutationCoverage -> target/pit-reports -->
             <plugin>
                 <groupId>org.pitest</groupId>
