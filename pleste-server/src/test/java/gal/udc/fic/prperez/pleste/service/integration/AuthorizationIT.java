@@ -26,7 +26,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+		classes = Application.class,
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = "spring.datasource.url=jdbc:h2:mem:pleste-authorization-test")
 @DisplayName("Integration Tests: authorization over the real HTTP endpoints")
 public class AuthorizationIT {
 
