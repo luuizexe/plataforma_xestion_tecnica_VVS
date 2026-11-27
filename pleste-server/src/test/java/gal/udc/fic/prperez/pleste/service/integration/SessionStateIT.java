@@ -26,7 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Proba as transicións do diagrama de estados da sesión (docs/diagramas/estado-sesion.md):
  * sen sesión → login → con sesión (normal ou administrador) → logout → sen sesión.
  */
-@SpringBootTest(classes = Application.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+		classes = Application.class,
+		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+		properties = "spring.datasource.url=jdbc:h2:mem:pleste-session-test")
 @DisplayName("Integration Tests: session state transitions")
 public class SessionStateIT {
 
